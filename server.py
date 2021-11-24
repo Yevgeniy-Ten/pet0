@@ -2,6 +2,9 @@ from socketserver import StreamRequestHandler, TCPServer, ThreadingMixIn
 from request import Request
 from response import Response
 from StaticResponder import StaticResponder
+import views
+from random import randint
+
 
 
 class HelloTCPServer(StreamRequestHandler):
@@ -16,7 +19,13 @@ class HelloTCPServer(StreamRequestHandler):
         else:
             response.add_header("Content-Type", "text/html")
             response.add_header("Connection", "close")
-            response.set_body('<h1>Hello, world!</h1>')
+            route_func = views.routes.get(request.uri, "404")
+            if "/movies/" in request.uri:
+                views.show_movie(request, response)
+            elif route_func == "404":
+                response.set_status(Response.HTTP_NOT_FOUND)
+            else:
+                route_func(request, response)
 
         response.send()
 
@@ -29,4 +38,5 @@ HOST, PORT = "127.0.0.1", 8000
 TCPServer.allow_reuse_address = True
 
 with TCPServer((HOST, PORT), HelloTCPServer) as s:
+    print(f'Server on port: {PORT}')
     s.serve_forever()
