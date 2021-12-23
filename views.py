@@ -22,7 +22,7 @@ def show_movies(request, response):
                     <div class="card-body">
                         <h5 class="card-title">{movie.id} {movie.name}</h5>
                         <p class="card-text">{movie.description}</p>
-                        <a href="/movies/{movie.id}" class="btn btn-primary">Detail</a>
+                        <a href="/movies/find?id={movie.id}" class="btn btn-primary">Detail</a>
                     </div>
                 </div>
         </div>
@@ -61,7 +61,31 @@ def create_movie(request, response):
     response.add_header('Location', "/")
 
 
+def find_one_movie(request, response):
+    id_split = request.query.split("=")
+    if len(id_split) > 1:
+        id = id_split[1]
+        movie = db_movie.find_by_id(int(id))
+        html_movie = f'''
+            <div class="card" >
+                  <img src="{movie.img_url}" class="card-img-top" alt="...">
+                  <div class="card-body">
+                    <h5 class="card-title">Name: {movie.name}</h5>
+                    <p class="card-text">Description: {movie.description}.</p>
+                    <p class="card-text">Rating: {movie.rating}.</p>
+                  </div>
+        </div>
+            '''
+        with open("templates/detail.html", "r") as file:
+            html = file.read()
+            result_html = html.replace("{{movie}}", html_movie)
+            response.set_body(result_html)
+    else:
+        pass
+
+
 routes = {
     "/": show_movies,
-    "/create": create_movie
+    "/create": create_movie,
+    "/movies/find": find_one_movie
 }

@@ -6,7 +6,6 @@ import views
 from random import randint
 
 
-
 class HelloTCPServer(StreamRequestHandler):
     def handle(self):
         request = Request(self.rfile)
@@ -19,10 +18,12 @@ class HelloTCPServer(StreamRequestHandler):
         else:
             response.add_header("Content-Type", "text/html")
             response.add_header("Connection", "close")
+            if '?' in request.uri:
+                query_split = request.uri.split("?")
+                request.uri = query_split[0]
+                request.query = query_split[1]
             route_func = views.routes.get(request.uri, "404")
-            if "/movies/" in request.uri:
-                views.show_movie(request, response)
-            elif route_func == "404":
+            if route_func == "404":
                 response.set_status(Response.HTTP_NOT_FOUND)
             else:
                 route_func(request, response)
@@ -34,7 +35,7 @@ class ThreadedTCPServe(ThreadingMixIn, TCPServer):
     pass
 
 
-HOST, PORT = "127.0.0.1", 8000
+HOST, PORT = "127.0.0.1", 8001
 TCPServer.allow_reuse_address = True
 
 with TCPServer((HOST, PORT), HelloTCPServer) as s:

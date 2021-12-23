@@ -5,6 +5,7 @@ class Request:
         self.uri = ""
         self.protocol = ""
         self.body = ""
+        self.query = ""
         self.headers = {}
         self.parse_request_line()
         self.parse_headers()
